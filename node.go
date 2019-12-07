@@ -1,8 +1,9 @@
 package main
 
-import ("encoding/json"
-        "log"	
-        "time"		
+import (
+	"encoding/json"
+	"log"
+	"time"
 )
 
 type node struct {
@@ -15,18 +16,18 @@ func newNode(ip string, port string) node {
 
 	returnNode := new(node)
 	returnNode.IPaddress = ip
-    returnNode.Port = port
-    returnNode.LastActive =  time.Now()
+	returnNode.Port = port
+	returnNode.LastActive = time.Now()
 	return *returnNode
 }
 func (node node) toJSONString() string {
-	nodeString,err := json.Marshal(node)
-		if err != nil {
-			log.Fatalln(err)
-        }
-    return string(nodeString)
+	nodeString, err := json.Marshal(node)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return string(nodeString)
 }
 
 func (node *node) setActive() {
-    node.LastActive = time.Now()
+	node.LastActive = time.Now()
 }
