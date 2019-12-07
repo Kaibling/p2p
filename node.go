@@ -10,12 +10,12 @@ type node struct {
 	LastActive int64
 }
 
-func newNode(ip string, port string) *node {
+func newNode(ip string, port string) node {
 
 	returnNode := new(node)
 	returnNode.Ipaddress = ip
 	returnNode.Port = port
-	return returnNode
+	return *returnNode
 }
 func (node node) toJSONString() string {
 	nodeString,err := json.Marshal(node)

@@ -6,18 +6,20 @@ import ("flag"
 "log"
 "os"
 "encoding/json"
+"bytes"
 )
 
 type Configuration struct {
-	IPAddress string
-	Port string
+	BindingIPAddress string
+	BindingPort string
+	PeerServer string
 }
 
 func parseArguments() map[string] string{
 
 	arguments := make( map[string] string)
 
-	conString := flag.String("server", "", "a connection string [ip/port]")
+	conString := flag.String("peerServer", "", "a connection string [ip/port]")
 	configString := flag.String("config", "config.json", "filepath to configuration file")
 	flag.Parse()
 
@@ -57,8 +59,9 @@ func parseConfigurationFile(filepath string) *Configuration{
 			checkError(err)
 			
 			returnConfig := new(Configuration)
-			returnConfig.IPAddress = getPublicIP()
-			returnConfig.Port = "54321"
+			returnConfig.BindingIPAddress = getPublicIP()
+			returnConfig.BindingPort = "54321"
+			//returnConfig.PeerServer = 
 			configString, err := json.Marshal(returnConfig)
 			checkError(err)
 			_, err = fo.Write(configString)
@@ -80,8 +83,28 @@ func parseConfigurationFile(filepath string) *Configuration{
 	return returnConfig
 }
 
-    func checkError(err error) {
-        if err != nil {
-			log.Fatalln(err)
-		}
+func checkError(err error) {
+    if err != nil {
+		log.Fatalln(err)
+	}
+}
+
+func postRequest(url string, postReqest []byte) {
+    log.Println("trying post request to: ", url)
+
+    req, err := http.NewRequest("POST", url, bytes.NewBuffer(postReqest))
+    //req.Header.Set("X-Custom-Header", "myvalue")
+    req.Header.Set("Content-Type", "application/json")
+
+    client := &http.Client{}
+    resp, err := client.Do(req)
+    if err != nil {
+        panic(err)
     }
+    defer resp.Body.Close()
+
+    log.Println("response Status:", resp.Status)
+    log.Println("response Headers:", resp.Header)
+    body, _ := ioutil.ReadAll(resp.Body)
+    log.Println("response Body:", string(body))
+}
