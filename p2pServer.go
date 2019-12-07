@@ -49,7 +49,7 @@ func (nodeBuffer *nodeBuffer) toJSON() string {
 func newP2Pserver(configuration *configuration) *p2pserver {
 
 	returnP2Pserver := new(p2pserver)
-	returnP2Pserver.publicIP = getPublicIP()
+	returnP2Pserver.publicIP = "undef"
 	returnP2Pserver.configuration = configuration
 	newNode := newNode(configuration.BindingIPAddress, configuration.BindingPort)
 	returnP2Pserver.nodeBuffer = new(nodeBuffer)
@@ -110,16 +110,16 @@ func (p2pserver *p2pserver) startServer() {
 	}
 
 	log.Println("Server started on " + p2pserver.configuration.BindingIPAddress + ":" + p2pserver.configuration.BindingPort)
-	http.HandleFunc("/ping",pingHandler)
-	http.HandleFunc("/getNodes",p2pserver.getNodesHandler)
-	http.HandleFunc("/register",p2pserver.registerHandler)
+	http.HandleFunc("/ping", pingHandler)
+	http.HandleFunc("/getNodes", p2pserver.getNodesHandler)
+	http.HandleFunc("/register", p2pserver.registerHandler)
 	http.ListenAndServe(":"+p2pserver.configuration.BindingPort, nil)
 }
 
 func pingHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("/ping")
 	fmt.Fprintf(w, "OK")
-	
+
 }
 
 func (p2pserver *p2pserver) getNodesHandler(w http.ResponseWriter, r *http.Request) {
@@ -129,26 +129,26 @@ func (p2pserver *p2pserver) getNodesHandler(w http.ResponseWriter, r *http.Reque
 
 func (p2pserver *p2pserver) registerHandler(w http.ResponseWriter, r *http.Request) {
 
-		log.Println("register attempt")
-		log.Println(r.Method)
-		if err := r.ParseForm(); err != nil {
-			fmt.Println(w, "ParseForm() err: %v", err)
-			return
-		}
-
-		//parse client
-		var resa node
-		buf := new(bytes.Buffer)
-		buf.ReadFrom(r.Body)
-		json.Unmarshal([]byte(buf.String()), &resa)
-		log.Println(resa)
-		p2pserver.addNode(resa.IPaddress, resa.Port)
-
-		//send to client
-		log.Println("send: " + p2pserver.nodeBuffer.toJSON())
-		fmt.Fprintf(w, p2pserver.nodeBuffer.toJSON())
-
+	log.Println("register attempt")
+	log.Println(r.Method)
+	if err := r.ParseForm(); err != nil {
+		fmt.Println(w, "ParseForm() err: %v", err)
+		return
 	}
+
+	//parse client
+	var resa node
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(r.Body)
+	json.Unmarshal([]byte(buf.String()), &resa)
+	log.Println(resa)
+	p2pserver.addNode(resa.IPaddress, resa.Port)
+
+	//send to client
+	log.Println("send: " + p2pserver.nodeBuffer.toJSON())
+	fmt.Fprintf(w, p2pserver.nodeBuffer.toJSON())
+
+}
 
 func keepAlive(nodeBuffer *nodeBuffer, keepAliveTime int) {
 	ticker := time.NewTicker(time.Duration(keepAliveTime) * 1000 * time.Millisecond)

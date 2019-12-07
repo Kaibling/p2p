@@ -32,6 +32,7 @@ func parseArguments() map[string]string {
 	return arguments
 }
 
+/*
 func getPublicIP() string {
 	url := "https://api.ipify.org?format=text"
 	resp, err := http.Get(url)
@@ -45,6 +46,7 @@ func getPublicIP() string {
 	}
 	return string(ip)
 }
+*/
 
 func getRequest(url string) string {
 
@@ -75,7 +77,7 @@ func parseConfigurationFile(filepath string) *configuration {
 			checkError(err)
 
 			returnConfig := new(configuration)
-			returnConfig.BindingIPAddress = getPublicIP()
+			returnConfig.BindingIPAddress = "127.0.0.1"
 			returnConfig.BindingPort = "54321"
 			configString, err := json.Marshal(returnConfig)
 			checkError(err)
@@ -109,6 +111,9 @@ func postRequest(url string, postReqest []byte) {
 
 	log.Println("trying post request to: ", url)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(postReqest))
+	if err != nil {
+		log.Println(err)
+	}
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
@@ -130,6 +135,6 @@ func find(a []node, x node) int {
 	return len(a)
 }
 
- func getHourMinuteSecond(hour, minute, second time.Duration) time.Time {
-    return time.Now().Add(time.Hour*hour + time.Minute*minute + time.Second*second)
- }
+func getHourMinuteSecond(hour, minute, second time.Duration) time.Time {
+	return time.Now().Add(time.Hour*hour + time.Minute*minute + time.Second*second)
+}
