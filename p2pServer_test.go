@@ -13,7 +13,7 @@ func TestGetNodesHandler(t *testing.T) {
 	res := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "http://localhost:54321/getNodes", nil)
 
-	config := &Configuration{
+	config := &configuration{
 		BindingIPAddress:"1.2.3.4",
 		BindingPort:"54321",
 		PeerServer:""}

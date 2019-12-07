@@ -13,7 +13,7 @@ import (
 type p2pserver struct {
 	nodeBuffer    *nodeBuffer
 	publicIP      string
-	configuration *Configuration
+	configuration *configuration
 }
 type nodeBuffer struct {
 	nodes []node
@@ -25,7 +25,7 @@ func (nodeBuffer *nodeBuffer) addNode(node node) {
 
 func (nodeBuffer *nodeBuffer) deleteNode(node node) {
 
-	i := Find(nodeBuffer.nodes, node)
+	i := find(nodeBuffer.nodes, node)
 	if i == len(nodeBuffer.nodes) {
 		log.Println("element not found")
 		return
@@ -46,7 +46,7 @@ func (nodeBuffer *nodeBuffer) toJSON() string {
 	return string(jnodes)
 }
 
-func newP2Pserver(configuration *Configuration) *p2pserver {
+func newP2Pserver(configuration *configuration) *p2pserver {
 
 	returnP2Pserver := new(p2pserver)
 	returnP2Pserver.publicIP = getPublicIP()
@@ -161,8 +161,6 @@ func keepAlive(nodeBuffer *nodeBuffer, keepAliveTime int) {
 				return
 			case <-ticker.C:
 				for _, node := range nodeBuffer.nodes {
-					//temp := node
-					//nodes[i] = &temp
 					url := "http://" + node.IPaddress + ":" + node.Port + "/ping"
 					requestData := getRequest(url)
 					if requestData == "OK" {

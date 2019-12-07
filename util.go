@@ -10,7 +10,7 @@ import (
 	"os"
 )
 
-type Configuration struct {
+type configuration struct {
 	BindingIPAddress string
 	BindingPort      string
 	PeerServer       string
@@ -60,7 +60,7 @@ func getRequest(url string) string {
 	return string(data)
 }
 
-func parseConfigurationFile(filepath string) *Configuration {
+func parseConfigurationFile(filepath string) *configuration {
 
 	if filepath == "config.json" {
 		//default path found
@@ -73,7 +73,7 @@ func parseConfigurationFile(filepath string) *Configuration {
 			fo, err := os.Create("config.json")
 			checkError(err)
 
-			returnConfig := new(Configuration)
+			returnConfig := new(configuration)
 			returnConfig.BindingIPAddress = getPublicIP()
 			returnConfig.BindingPort = "54321"
 			configString, err := json.Marshal(returnConfig)
@@ -89,7 +89,7 @@ func parseConfigurationFile(filepath string) *Configuration {
 
 	}
 	log.Println("opening configuration file: " + filepath)
-	returnConfig := new(Configuration)
+	returnConfig := new(configuration)
 	file, err := os.Open(filepath)
 	checkError(err)
 	decoder := json.NewDecoder(file)
@@ -120,7 +120,7 @@ func postRequest(url string, postReqest []byte) {
 	log.Println("response Body:", string(body))
 }
 
-func Find(a []node, x node) int {
+func find(a []node, x node) int {
 	for i, n := range a {
 		if x.IPaddress == n.IPaddress && x.Port == n.Port {
 			return i
