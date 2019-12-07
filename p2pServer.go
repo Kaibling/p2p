@@ -99,7 +99,7 @@ func (p2pserver *p2pserver) registerNetwork() {
 }
 
 func (p2pserver *p2pserver) startServer() {
-	KeepAlive(p2pserver.nodeBuffer, 5)
+	keepAlive(p2pserver.nodeBuffer, 5)
 
 	if strings.Compare(p2pserver.configuration.PeerServer, "") != 0 {
 		log.Println("Connection String " + p2pserver.configuration.PeerServer + " found")
@@ -109,7 +109,25 @@ func (p2pserver *p2pserver) startServer() {
 		log.Println("Starting  new network")
 	}
 
-	http.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
+	log.Println("Server started on " + p2pserver.configuration.BindingIPAddress + ":" + p2pserver.configuration.BindingPort)
+	http.HandleFunc("/ping",pingHandler)
+	http.HandleFunc("/getNodes",p2pserver.getNodesHandler)
+	http.HandleFunc("/register",p2pserver.registerHandler)
+	http.ListenAndServe(":"+p2pserver.configuration.BindingPort, nil)
+}
+
+func pingHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("/ping")
+	fmt.Fprintf(w, "OK")
+	
+}
+
+func (p2pserver *p2pserver) getNodesHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println(r)
+	fmt.Fprintf(w, p2pserver.nodeBuffer.toJSON())
+}
+
+func (p2pserver *p2pserver) registerHandler(w http.ResponseWriter, r *http.Request) {
 
 		log.Println("register attempt")
 		log.Println(r.Method)
@@ -130,24 +148,9 @@ func (p2pserver *p2pserver) startServer() {
 		log.Println("send: " + p2pserver.nodeBuffer.toJSON())
 		fmt.Fprintf(w, p2pserver.nodeBuffer.toJSON())
 
-	})
+	}
 
-	http.HandleFunc("/getNodes", func(w http.ResponseWriter, r *http.Request) {
-
-		log.Println(r)
-		fmt.Fprintf(w, p2pserver.nodeBuffer.toJSON())
-	})
-
-	http.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
-
-		log.Println("/ping")
-		fmt.Fprintf(w, "OK")
-	})
-	log.Println("Server started on " + p2pserver.configuration.BindingIPAddress + ":" + p2pserver.configuration.BindingPort)
-	http.ListenAndServe(":"+p2pserver.configuration.BindingPort, nil)
-}
-
-func KeepAlive(nodeBuffer *nodeBuffer, keepAliveTime int) {
+func keepAlive(nodeBuffer *nodeBuffer, keepAliveTime int) {
 	ticker := time.NewTicker(time.Duration(keepAliveTime) * 1000 * time.Millisecond)
 	done := make(chan bool)
 
