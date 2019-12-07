@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
 type configuration struct {
@@ -128,3 +129,7 @@ func find(a []node, x node) int {
 	}
 	return len(a)
 }
+
+ func getHourMinuteSecond(hour, minute, second time.Duration) time.Time {
+    return time.Now().Add(time.Hour*hour + time.Minute*minute + time.Second*second)
+ }

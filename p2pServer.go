@@ -169,7 +169,7 @@ func keepAlive(nodeBuffer *nodeBuffer, keepAliveTime int) {
 					} else {
 						log.Println("KeepAlive failed with " + url)
 						//todo: killt zu schnell
-						oldStamp := GetHourMinuteSecond(0, 0, -5)
+						oldStamp := getHourMinuteSecond(0, 0, -5)
 						if node.LastActive.Before(oldStamp) {
 							log.Println("node too old")
 							nodeBuffer.deleteNode(node)
