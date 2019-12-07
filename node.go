@@ -1,20 +1,22 @@
 package main
 
 import ("encoding/json"
-		"log"			
+        "log"	
+        "time"		
 )
 
 type node struct {
-	Ipaddress  string
+	IPaddress  string
 	Port       string
-	LastActive int64
+	LastActive time.Time
 }
 
 func newNode(ip string, port string) node {
 
 	returnNode := new(node)
-	returnNode.Ipaddress = ip
-	returnNode.Port = port
+	returnNode.IPaddress = ip
+    returnNode.Port = port
+    returnNode.LastActive =  time.Now()
 	return *returnNode
 }
 func (node node) toJSONString() string {
@@ -23,4 +25,8 @@ func (node node) toJSONString() string {
 			log.Fatalln(err)
         }
     return string(nodeString)
+}
+
+func (node *node) setActive() {
+    node.LastActive = time.Now()
 }

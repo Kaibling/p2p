@@ -18,16 +18,15 @@ type Configuration struct {
 func parseArguments() map[string] string{
 
 	arguments := make( map[string] string)
-
 	conString := flag.String("peerServer", "", "a connection string [ip/port]")
 	configString := flag.String("config", "config.json", "filepath to configuration file")
 	flag.Parse()
 
     arguments["connectionstring"] = *conString
     arguments["configFilePath"] = *configString
-
 	log.Print("load command line arguments ")
-	log.Print(arguments)
+    log.Print(arguments)
+
 	return arguments
 }
 
@@ -45,13 +44,28 @@ func getPublicIP() string {
     return string(ip)
 }
 
+func getRequest(url string) string {
+
+    resp, err := http.Get(url)
+    if err != nil {
+        log.Println(err)
+        return "NOK"
+    }
+	defer resp.Body.Close()
+    data, err := ioutil.ReadAll(resp.Body)
+    if err != nil {
+        log.Println(err)
+    }
+    return string(data)
+}
+
 func parseConfigurationFile(filepath string) *Configuration{
 
     if filepath == "config.json" {
         //default path found
         //create config file
-
         _, err := os.Stat(filepath)
+
         if os.IsNotExist(err) {
 			log.Println("file does not exists")
 			
@@ -61,9 +75,9 @@ func parseConfigurationFile(filepath string) *Configuration{
 			returnConfig := new(Configuration)
 			returnConfig.BindingIPAddress = getPublicIP()
 			returnConfig.BindingPort = "54321"
-			//returnConfig.PeerServer = 
 			configString, err := json.Marshal(returnConfig)
-			checkError(err)
+            checkError(err)
+            
 			_, err = fo.Write(configString)
 			checkError(err)
 
@@ -90,10 +104,9 @@ func checkError(err error) {
 }
 
 func postRequest(url string, postReqest []byte) {
-    log.Println("trying post request to: ", url)
 
+    log.Println("trying post request to: ", url)
     req, err := http.NewRequest("POST", url, bytes.NewBuffer(postReqest))
-    //req.Header.Set("X-Custom-Header", "myvalue")
     req.Header.Set("Content-Type", "application/json")
 
     client := &http.Client{}
@@ -102,9 +115,16 @@ func postRequest(url string, postReqest []byte) {
         panic(err)
     }
     defer resp.Body.Close()
-
-    log.Println("response Status:", resp.Status)
-    log.Println("response Headers:", resp.Header)
     body, _ := ioutil.ReadAll(resp.Body)
     log.Println("response Body:", string(body))
+}
+
+
+func Find(a []node, x node) int {
+    for i, n := range a {
+        if x.IPaddress == n.IPaddress && x.Port == n.Port {
+            return i
+        }
+    }
+    return len(a)
 }
