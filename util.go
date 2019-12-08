@@ -15,7 +15,7 @@ type configuration struct {
 	BindingIPAddress string
 	BindingPort      string
 	PeerServer       string
-	KeepAlive		 int16
+	KeepAlive		 time.Duration
 	NetworkName		 string
 }
 
@@ -112,7 +112,7 @@ func checkError(err error) {
 	}
 }
 
-func postRequest(url string, postRequest []byte) {
+func postRequest(url string, postRequest []byte) string {
 
 	log.Println("trying post request to: ", url)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(postRequest))
@@ -133,6 +133,8 @@ func postRequest(url string, postRequest []byte) {
 	}
 	resp.Body.Close()
 	log.Println("response Body:", string(body))
+
+	return string(body)
 }
 
 func findNodeInArray(a []node, x node) int {

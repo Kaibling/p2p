@@ -19,6 +19,12 @@ type nodeBuffer struct {
 	nodes []node
 }
 
+type configCheck struct {
+	KeepAlive time.Duration
+	NetworkName string
+}
+
+
 func (nodeBuffer *nodeBuffer) addNode(node node) {
 	i := findNodeInArray(nodeBuffer.nodes, node)
 	if i == len(nodeBuffer.nodes) {
@@ -104,6 +110,7 @@ func (p2pserver *p2pserver) deleteNode(ipAddress string, port string) {
 
 func (p2pserver *p2pserver) registerNetwork() {
 
+	//send own node data to server
 	connectionString := "http://" + p2pserver.configuration.PeerServer + "/register"
 	log.Println("trying to register to " + connectionString)
 	localNode := newNode(p2pserver.configuration.BindingIPAddress, p2pserver.configuration.BindingPort)
@@ -111,19 +118,32 @@ func (p2pserver *p2pserver) registerNetwork() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-
 	resp, err := http.Post(connectionString, "application/json", bytes.NewBuffer(bytesRepresentation))
 	if err != nil {
 		log.Fatalln(err)
 	}
 
+	//get nodes vom server
 	var result []node
 	json.NewDecoder(resp.Body).Decode(&result)
 	log.Println("get response from network connect request")
 	log.Println(result)
-	log.Println("set new node buffer")
 	p2pserver.nodeBuffer.nodes = result
 
+	//check config
+	connectionString = "http://" + p2pserver.configuration.PeerServer + "/config"
+
+	sendConfigCheck := &configCheck{NetworkName: p2pserver.configuration.NetworkName,KeepAlive: p2pserver.configuration.KeepAlive}
+	bytesRepresentation, err = json.Marshal(sendConfigCheck)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	log.Println("sending config")
+	log.Println(string(bytesRepresentation))
+	configStatus := postRequest(connectionString,bytesRepresentation)
+	if configStatus != "OK" {
+		log.Println("config missmatch")
+	} 
 }
 
 func (p2pserver *p2pserver) startServer() {
@@ -143,6 +163,7 @@ func (p2pserver *p2pserver) startServer() {
 	http.HandleFunc("/getNodes", p2pserver.getNodesHandler)
 	http.HandleFunc("/register", p2pserver.registerHandler)
 	http.HandleFunc("/pushNode", p2pserver.pushNewNodeInfoHandler)
+	http.HandleFunc("/config", p2pserver.configHandler)
 
 	http.ListenAndServe(":"+p2pserver.configuration.BindingPort, nil)
 }
@@ -150,6 +171,28 @@ func (p2pserver *p2pserver) startServer() {
 func pingHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("/ping")
 	fmt.Fprintf(w, "OK")
+}
+
+func (p2pserver *p2pserver) configHandler(w http.ResponseWriter, r *http.Request) {
+
+	log.Println(r.Method)
+	if err := r.ParseForm(); err != nil {
+		fmt.Println(w, "ParseForm() err: %v", err)
+		return
+	}
+
+	var result configCheck
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(r.Body)
+	json.Unmarshal([]byte(buf.String()), &result)
+	if result.NetworkName != p2pserver.configuration.NetworkName || result.KeepAlive != p2pserver.configuration.KeepAlive {
+		log.Println("config missmatch with client")
+		log.Println(p2pserver.configuration)
+		log.Println(result)
+		fmt.Fprintf(w, "NOK")
+	} else {
+		fmt.Fprintf(w, "OK")
+	}
 
 }
 
