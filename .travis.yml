@@ -20,14 +20,14 @@ jobs:
     - stage: Linux release
       if: branch = master
       script: 
-        - go build cmd/p2pServer/main.go
+        - go build -o p2pserverd cmd/p2pServer/main.go
         - ls
       os:  linux
-
-    - stage: Windows release
-      if: branch = master
-      script: 
-        - go build cmd/p2pServer/main.go
-        - ls
-      os:  windows
-
+deploy:
+  provider: releases
+  api_key: "Uf4p91HDYa5hjdWtIj2yevw8LtSLS6LkxkilMQ/ckHdgpnHN/9b4qkTNKy7lys6HW0qBVBb8fo+1dfzKV1yQykPaeWU9KlMW4FCk3hNsNJSxq5NW+a2EIMrjKX/4VWVIb+yVldE56ltDYx681nn+9OBa4/9sxaAKFyz7VCDP/kl+yRa//Jhi9I1H7IPOA8TwC03zlPwnr2iJ3gccrSSkkRICHVcfmkSoexHZOAx792lwb8ZpWvYCzlZ+pBYz2LhnNUPjYk6eBCPQ8Z4SYGKcUSAiIuwsJmAlyuz0nYkGW/pgELtF52S7Wxp5+YU5IcYkXR0k9RLK8UnIkvqRDnLn9gLX6edznlCCuzZGTIhRVhZpkgUHReWv2Kp1tuaWFll8L6xOZ4KgtjH6kYvZnKxqK7nAfHo1UrFMlPzPWt/iTUsleMgYOFD9sTEg0KCne0F96ilNlvv331n7hVQp7THQBOLoqKjA/cqKZM72L3c/klDP2DuAlTkpDPYpXu6Oyp+hAzrf2z4d/D7f44hLhZxEJoaaSlzzzfGBKOpCXxNro6paKI+UWBlpR0daQ48o9bxkN4RETbJTzuevJLemLm0qbI127wLA5p1iDn5cUarrtWsI26eN3T+jM4ZcEVHGMk3gq1z+lcji7o5BIfTjbE5UokPYM74QXLFD5+sKL7qT4Lk="
+  file:
+    - "p2pserverd"
+  skip_cleanup: true
+  on:
+    tags: true
