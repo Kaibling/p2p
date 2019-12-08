@@ -18,18 +18,17 @@ jobs:
         - go get github.com/Kaibling/p2p/libs/util
         - go get github.com/Kaibling/p2p/libs/Node
     - stage: Linux release
-        if: branch = master
-        script: 
-          - go build -o p2pserverd cmd/p2pServer/main.go
-          - ls
-        os:  linux
-        deploy:
-          provider: releases
-          api_key:
-            secure: "RUWWzebH4H4s/tXCLeOii3AbAaElBCnbcERS/tXATW+3aGyoCj0AMd4IFjiSHxdqmja10e2ilm6gypa19vb4Ovijj9eujNWkXiXOwZfr7uikSUFVMIrgHbYmn6iIwciJzV6viI0ynFDsUePPomM7qZVpufkKJ4oFlsuYhqcsDP9eP8HI9Zpw2/sI4Ohk7LWytSnxTKUSIWSgtoCu/2UfAKdYnhAVcC1jTT8yDLz0xRz9BSnOpWMDhWlmN5Hl+JBMo+P//z69bq5DkHSekGrT9v759iQyU5xCNJk9DkmYzGszJoGaXNwKqoJX7gA2gb+wRY6cD8GIcRjoRYHbSHcgRrOdMKBFgRd0c0X0C2iq2vU8ZCFFPJZB5NHyPxbKYGaeVesL+jaEus43CIqP2OIovebqHr5BMnHW4Vck2YHYWNrJsauzSpEkpnDlRnFkArqbk93FEekow5unPbSYCWn07LWSpNqCF5s/nlUjcVgmiiRDkdJr2ZguI4vKVjFVaoz4dKQZCwmMLYtwAjLWv7f8B9lOP+Rss1EsR3eydocKoz2IU/B9k9iQWI6uuVLMuH5lYogNGENdq4hhWTum6htspr7zpf6PSRUAax+yOprNRJjBR0+2vupniMqef8zaP5SmllYVYvIm5uoRb2ETCmNt+z+JeZDemdtXdR4O8Jf0lao="
-          file:
-            - "p2pserverd"
-          skip_cleanup: true
-          on:
-            tags: true
-
+      if: branch = master
+      script: 
+        - go build -o p2pserverd cmd/p2pServer/main.go
+        - ls
+      os:  linux
+      deploy:
+        provider: releases
+        api_key:
+          secure: "RUWWzebH4H4s/tXCLeOii3AbAaElBCnbcERS/tXATW+3aGyoCj0AMd4IFjiSHxdqmja10e2ilm6gypa19vb4Ovijj9eujNWkXiXOwZfr7uikSUFVMIrgHbYmn6iIwciJzV6viI0ynFDsUePPomM7qZVpufkKJ4oFlsuYhqcsDP9eP8HI9Zpw2/sI4Ohk7LWytSnxTKUSIWSgtoCu/2UfAKdYnhAVcC1jTT8yDLz0xRz9BSnOpWMDhWlmN5Hl+JBMo+P//z69bq5DkHSekGrT9v759iQyU5xCNJk9DkmYzGszJoGaXNwKqoJX7gA2gb+wRY6cD8GIcRjoRYHbSHcgRrOdMKBFgRd0c0X0C2iq2vU8ZCFFPJZB5NHyPxbKYGaeVesL+jaEus43CIqP2OIovebqHr5BMnHW4Vck2YHYWNrJsauzSpEkpnDlRnFkArqbk93FEekow5unPbSYCWn07LWSpNqCF5s/nlUjcVgmiiRDkdJr2ZguI4vKVjFVaoz4dKQZCwmMLYtwAjLWv7f8B9lOP+Rss1EsR3eydocKoz2IU/B9k9iQWI6uuVLMuH5lYogNGENdq4hhWTum6htspr7zpf6PSRUAax+yOprNRJjBR0+2vupniMqef8zaP5SmllYVYvIm5uoRb2ETCmNt+z+JeZDemdtXdR4O8Jf0lao="
+        file:
+          - "p2pserverd"
+        skip_cleanup: true
+        on:
+          tags: true
