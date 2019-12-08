@@ -65,13 +65,9 @@ func newP2Pserver(configuration *configuration) *p2pserver {
 
 }
 
-func (p2pserver *p2pserver) addNode(ipAddress string, port string) {
-
-	//save locally
+func (p2pserver *p2pserver) pushNode(ipAddress string, port string) {
 	newNode := newNode(ipAddress, port)
-	p2pserver.nodeBuffer.addNode(newNode)
-
-	//push to network
+//push to network
 	for _, node := range p2pserver.nodeBuffer.nodes {
 		//no local connection
 		if node.IPaddress == p2pserver.configuration.BindingIPAddress && node.Port == p2pserver.configuration.BindingPort {
@@ -83,14 +79,20 @@ func (p2pserver *p2pserver) addNode(ipAddress string, port string) {
 		}
 
 		url := "http://" + node.IPaddress + ":" + node.Port + "/pushNode"
-		nodeJSON, err := json.Marshal(node)
+		nodeJSON, err := json.Marshal(newNode)
 		if err != nil {
 			log.Println(err)
 		}
 		postRequest(url,nodeJSON)
 	}
 
+}
 
+func (p2pserver *p2pserver) addNode(ipAddress string, port string) {
+
+	//save locally
+	newNode := newNode(ipAddress, port)
+	p2pserver.nodeBuffer.addNode(newNode)
 
 }
 
@@ -177,6 +179,8 @@ func (p2pserver *p2pserver) registerHandler(w http.ResponseWriter, r *http.Reque
 	//send to client
 	log.Println("send: " + p2pserver.nodeBuffer.toJSON())
 	fmt.Fprintf(w, p2pserver.nodeBuffer.toJSON())
+
+	p2pserver.pushNode(resa.IPaddress,resa.Port)
 
 }
 
