@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"github.com/kaibling/p2p/libs/Node"
-	"github.com/kaibling/p2p/libs/util"
+	"github.com/Kaibling/p2p/libs/Node"
+	"github.com/Kaibling/p2p/libs/util"
 )
 
 func TestGetNodesHandler(t *testing.T) {

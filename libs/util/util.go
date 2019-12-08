@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"os"
 	"time"
-	"github.com/kaibling/p2p/libs/Node"
+	"github.com/Kaibling/p2p/libs/Node"
 )
 
 type Configuration struct {

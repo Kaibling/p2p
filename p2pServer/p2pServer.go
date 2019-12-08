@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
-	"github.com/kaibling/p2p/libs/Node"
-	"github.com/kaibling/p2p/libs/util"
+	"github.com/Kaibling/p2p/libs/Node"
+	"github.com/Kaibling/p2p/libs/util"
 )
 
 type p2pserver struct {

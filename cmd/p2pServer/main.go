@@ -1,7 +1,7 @@
 package main
 
-import "github.com/kaibling/p2p/p2pServer"
-import "github.com/kaibling/p2p/libs/util"
+import "github.com/Kaibling/p2p/p2pServer"
+import "github.com/Kaibling/p2p/libs/util"
 
 
 func main() {
