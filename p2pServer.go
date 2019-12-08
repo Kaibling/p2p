@@ -30,10 +30,7 @@ func (nodeBuffer *nodeBuffer) deleteNode(node node) {
 		log.Println("element not found")
 		return
 	}
-	log.Println(i)
-	log.Println(len(nodeBuffer.nodes))
-	a := i + 1
-	nodeBuffer.nodes = append(nodeBuffer.nodes[:i], nodeBuffer.nodes[a:]...)
+	nodeBuffer.nodes = append(nodeBuffer.nodes[:i], nodeBuffer.nodes[i+1:]...)
 	log.Println(nodeBuffer.nodes)
 
 }
@@ -99,7 +96,7 @@ func (p2pserver *p2pserver) registerNetwork() {
 }
 
 func (p2pserver *p2pserver) startServer() {
-	keepAlive(p2pserver.nodeBuffer, 5)
+	p2pserver.keepAlive(5)
 
 	if strings.Compare(p2pserver.configuration.PeerServer, "") != 0 {
 		log.Println("Connection String " + p2pserver.configuration.PeerServer + " found")
@@ -150,7 +147,7 @@ func (p2pserver *p2pserver) registerHandler(w http.ResponseWriter, r *http.Reque
 
 }
 
-func keepAlive(nodeBuffer *nodeBuffer, keepAliveTime int) {
+func (p2pserver *p2pserver) keepAlive(keepAliveTime int) {
 	ticker := time.NewTicker(time.Duration(keepAliveTime) * 1000 * time.Millisecond)
 	done := make(chan bool)
 
@@ -160,7 +157,10 @@ func keepAlive(nodeBuffer *nodeBuffer, keepAliveTime int) {
 			case <-done:
 				return
 			case <-ticker.C:
-				for _, node := range nodeBuffer.nodes {
+				for _, node := range p2pserver.nodeBuffer.nodes {
+					if node.IPaddress == p2pserver.configuration.BindingIPAddress && node.Port == p2pserver.configuration.BindingPort {
+						continue
+					}
 					url := "http://" + node.IPaddress + ":" + node.Port + "/ping"
 					requestData := getRequest(url)
 					if requestData == "OK" {
@@ -172,7 +172,7 @@ func keepAlive(nodeBuffer *nodeBuffer, keepAliveTime int) {
 						oldStamp := getHourMinuteSecond(0, 0, -5)
 						if node.LastActive.Before(oldStamp) {
 							log.Println("node too old")
-							nodeBuffer.deleteNode(node)
+							p2pserver.nodeBuffer.deleteNode(node)
 
 						}
 					}
