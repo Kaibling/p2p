@@ -26,11 +26,11 @@ func (nodeBuffer *nodeBuffer) addNode(node node) {
 		nodeBuffer.nodes = append(nodeBuffer.nodes, node)
 		log.Print("add Node to Buffer: ")
 		log.Println(node)
-		
+
 	} else {
 		log.Println("node already in buffer. skip")
 	}
-	
+
 }
 
 func (nodeBuffer *nodeBuffer) deleteNode(node node) {
@@ -41,7 +41,8 @@ func (nodeBuffer *nodeBuffer) deleteNode(node node) {
 		return
 	}
 	nodeBuffer.nodes = append(nodeBuffer.nodes[:i], nodeBuffer.nodes[i+1:]...)
-	log.Println(nodeBuffer.nodes)
+	log.Println(node)
+	log.Println("node deleted")
 
 }
 
@@ -67,7 +68,7 @@ func newP2Pserver(configuration *configuration) *p2pserver {
 
 func (p2pserver *p2pserver) pushNode(ipAddress string, port string) {
 	newNode := newNode(ipAddress, port)
-//push to network
+	//push to network
 	for _, node := range p2pserver.nodeBuffer.nodes {
 		//no local connection
 		if node.IPaddress == p2pserver.configuration.BindingIPAddress && node.Port == p2pserver.configuration.BindingPort {
@@ -83,7 +84,7 @@ func (p2pserver *p2pserver) pushNode(ipAddress string, port string) {
 		if err != nil {
 			log.Println(err)
 		}
-		postRequest(url,nodeJSON)
+		postRequest(url, nodeJSON)
 	}
 
 }
@@ -97,10 +98,8 @@ func (p2pserver *p2pserver) addNode(ipAddress string, port string) {
 }
 
 func (p2pserver *p2pserver) deleteNode(ipAddress string, port string) {
-	searchNode := newNode("127.0.0.1", "54321")
+	searchNode := newNode(ipAddress, port)
 	p2pserver.nodeBuffer.deleteNode(searchNode)
-	log.Print("Node removed from Buffer: ")
-
 }
 
 func (p2pserver *p2pserver) registerNetwork() {
@@ -128,7 +127,7 @@ func (p2pserver *p2pserver) registerNetwork() {
 }
 
 func (p2pserver *p2pserver) startServer() {
-	p2pserver.keepAlive(5)
+	p2pserver.keepAlive()
 
 	if strings.Compare(p2pserver.configuration.PeerServer, "") != 0 {
 		log.Println("Connection String " + p2pserver.configuration.PeerServer + " found")
@@ -144,7 +143,7 @@ func (p2pserver *p2pserver) startServer() {
 	http.HandleFunc("/getNodes", p2pserver.getNodesHandler)
 	http.HandleFunc("/register", p2pserver.registerHandler)
 	http.HandleFunc("/pushNode", p2pserver.pushNewNodeInfoHandler)
-	
+
 	http.ListenAndServe(":"+p2pserver.configuration.BindingPort, nil)
 }
 
@@ -180,7 +179,7 @@ func (p2pserver *p2pserver) registerHandler(w http.ResponseWriter, r *http.Reque
 	log.Println("send: " + p2pserver.nodeBuffer.toJSON())
 	fmt.Fprintf(w, p2pserver.nodeBuffer.toJSON())
 
-	p2pserver.pushNode(resa.IPaddress,resa.Port)
+	p2pserver.pushNode(resa.IPaddress, resa.Port)
 
 }
 
@@ -207,8 +206,8 @@ func (p2pserver *p2pserver) pushNewNodeInfoHandler(w http.ResponseWriter, r *htt
 
 }
 
-func (p2pserver *p2pserver) keepAlive(keepAliveTime int) {
-	ticker := time.NewTicker(time.Duration(keepAliveTime) * 1000 * time.Millisecond)
+func (p2pserver *p2pserver) keepAlive() {
+	ticker := time.NewTicker(time.Duration(p2pserver.configuration.KeepAlive) * 1000 * time.Millisecond)
 	done := make(chan bool)
 
 	go func() {
@@ -221,23 +220,22 @@ func (p2pserver *p2pserver) keepAlive(keepAliveTime int) {
 					if node.IPaddress == p2pserver.configuration.BindingIPAddress && node.Port == p2pserver.configuration.BindingPort {
 						continue
 					}
-					url := "http://" + node.IPaddress + ":" + node.Port + "/ping"
-					requestData := getRequest(url)
-					if requestData == "OK" {
-						log.Println("KeepAlive OK with " + url)
-						node.setActive()
-					} else {
-						log.Println("KeepAlive failed with " + url)
-						//todo: killt zu schnell
-						oldStamp := getHourMinuteSecond(0, 0, -5)
-						if node.LastActive.Before(oldStamp) {
-							log.Println("node too old")
-							p2pserver.nodeBuffer.deleteNode(node)
 
+					oldStamp := getHourMinuteSecond(0, 0, -time.Duration(p2pserver.configuration.KeepAlive))
+					if node.LastActive.Before(oldStamp) {
+
+						log.Println("node too old")
+						url := "http://" + node.IPaddress + ":" + node.Port + "/ping"
+						requestData := getRequest(url)
+						if requestData == "OK" {
+							log.Println("KeepAlive OK with " + url)
+							node.setActive()
+						} else {
+							log.Println("KeepAlive failed with " + url)
+							p2pserver.nodeBuffer.deleteNode(node)
 						}
 					}
 				}
-
 			}
 		}
 	}()

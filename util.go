@@ -15,6 +15,8 @@ type configuration struct {
 	BindingIPAddress string
 	BindingPort      string
 	PeerServer       string
+	KeepAlive		 int16
+	NetworkName		 string
 }
 
 func parseArguments() map[string]string {
@@ -78,7 +80,10 @@ func parseConfigurationFile(filepath string) *configuration {
 
 			returnConfig := new(configuration)
 			returnConfig.BindingIPAddress = "127.0.0.1"
-			returnConfig.BindingPort = "54321"
+			returnConfig.BindingPort = "7070"
+			returnConfig.KeepAlive = 20
+			returnConfig.NetworkName = "default"
+
 			configString, err := json.Marshal(returnConfig)
 			checkError(err)
 
