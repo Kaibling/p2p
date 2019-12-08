@@ -16,16 +16,16 @@ jobs:
         - go get github.com/mattn/goveralls
         - go get github.com/kaibling/p2p
     - stage: Linux release
+      if: branch = master
       script: 
-        - go build
+        - go build cmd/p2pServer/main.go
         - ls
       os:  linux
-      on:
-        branch: master
+
     - stage: Windows release
+      if: branch = master
       script: 
-        - go build
+        - go build cmd/p2pServer/main.go
         - ls
       os:  windows
-      on:
-        branch: master
+
