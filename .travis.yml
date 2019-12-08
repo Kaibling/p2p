@@ -1,18 +1,27 @@
 language: go
 sudo: false
-os: 
-  - windows
-  - Linux
-
 go:
   - 1.11.5
 
-script: 
-  - go test -v -covermode=count -coverprofile=coverage.out
-  - $HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-ci
-  - go build
-  
-before_install:
-  - go get golang.org/x/tools/cmd/cover
-  - go get github.com/mattn/goveralls
-  
+jobs:
+  include:
+    - stage: unit tests
+      script: 
+        - go test -v -covermode=count -coverprofile=coverage.out
+        - $HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-ci
+      os: 
+        - windows
+        - Linux
+      before_install:
+        - go get golang.org/x/tools/cmd/cover
+        - go get github.com/mattn/goveralls
+    - stage: Linux release
+      script: 
+        - go build
+        - ls
+      os:  Linux
+    - stage: Windows release
+      script: 
+      - go build
+      - ls
+      os:  windows
