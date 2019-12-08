@@ -107,10 +107,10 @@ func checkError(err error) {
 	}
 }
 
-func postRequest(url string, postReqest []byte) {
+func postRequest(url string, postRequest []byte) {
 
 	log.Println("trying post request to: ", url)
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(postReqest))
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(postRequest))
 	if err != nil {
 		log.Println(err)
 	}
@@ -119,14 +119,18 @@ func postRequest(url string, postReqest []byte) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
-	defer resp.Body.Close()
-	body, _ := ioutil.ReadAll(resp.Body)
+	//defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Println(err)
+	}
+	resp.Body.Close()
 	log.Println("response Body:", string(body))
 }
 
-func find(a []node, x node) int {
+func findNodeInArray(a []node, x node) int {
 	for i, n := range a {
 		if x.IPaddress == n.IPaddress && x.Port == n.Port {
 			return i
