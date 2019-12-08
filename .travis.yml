@@ -6,7 +6,7 @@ jobs:
   include:
     - stage: unit tests
       script: 
-        - go test -v -covermode=count -coverprofile=coverage.out
+        - go test ./... -v -covermode=count -coverprofile=coverage.out
         - $HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-ci
       os: 
         - linux
@@ -14,13 +14,18 @@ jobs:
       before_install:
         - go get golang.org/x/tools/cmd/cover
         - go get github.com/mattn/goveralls
+        - go get github.com/kaibling/p2p
     - stage: Linux release
       script: 
         - go build
         - ls
       os:  linux
+      on:
+        branch: master
     - stage: Windows release
       script: 
         - go build
         - ls
       os:  windows
+      on:
+        branch: master

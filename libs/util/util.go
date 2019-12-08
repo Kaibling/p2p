@@ -1,4 +1,4 @@
-package main
+package util
 
 import (
 	"bytes"
@@ -9,9 +9,10 @@ import (
 	"net/http"
 	"os"
 	"time"
+	"github.com/kaibling/p2p/libs/Node"
 )
 
-type configuration struct {
+type Configuration struct {
 	BindingIPAddress string
 	BindingPort      string
 	PeerServer       string
@@ -19,7 +20,7 @@ type configuration struct {
 	NetworkName		 string
 }
 
-func parseArguments() map[string]string {
+func ParseArguments() map[string]string {
 
 	arguments := make(map[string]string)
 	conString := flag.String("peerServer", "", "a connection string [ip/port]")
@@ -50,7 +51,7 @@ func getPublicIP() string {
 }
 */
 
-func getRequest(url string) string {
+func GetRequest(url string) string {
 
 	resp, err := http.Get(url)
 	if err != nil {
@@ -65,7 +66,7 @@ func getRequest(url string) string {
 	return string(data)
 }
 
-func parseConfigurationFile(filepath string) *configuration {
+func ParseConfigurationFile(filepath string) *Configuration {
 
 	if filepath == "config.json" {
 		//default path found
@@ -76,19 +77,19 @@ func parseConfigurationFile(filepath string) *configuration {
 			log.Println("file does not exists")
 
 			fo, err := os.Create("config.json")
-			checkError(err)
+			CheckError(err)
 
-			returnConfig := new(configuration)
+			returnConfig := new(Configuration)
 			returnConfig.BindingIPAddress = "127.0.0.1"
 			returnConfig.BindingPort = "7070"
 			returnConfig.KeepAlive = 20
 			returnConfig.NetworkName = "default"
 
 			configString, err := json.Marshal(returnConfig)
-			checkError(err)
+			CheckError(err)
 
 			_, err = fo.Write(configString)
-			checkError(err)
+			CheckError(err)
 
 			defer fo.Close()
 			log.Println("Configuration file created")
@@ -97,22 +98,22 @@ func parseConfigurationFile(filepath string) *configuration {
 
 	}
 	log.Println("opening configuration file: " + filepath)
-	returnConfig := new(configuration)
+	returnConfig := new(Configuration)
 	file, err := os.Open(filepath)
-	checkError(err)
+	CheckError(err)
 	decoder := json.NewDecoder(file)
 	err = decoder.Decode(&returnConfig)
-	checkError(err)
+	CheckError(err)
 	return returnConfig
 }
 
-func checkError(err error) {
+func CheckError(err error) {
 	if err != nil {
 		log.Fatalln(err)
 	}
 }
 
-func postRequest(url string, postRequest []byte) string {
+func PostRequest(url string, postRequest []byte) string {
 
 	log.Println("trying post request to: ", url)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(postRequest))
@@ -137,7 +138,7 @@ func postRequest(url string, postRequest []byte) string {
 	return string(body)
 }
 
-func findNodeInArray(a []node, x node) int {
+func FindNodeInArray(a []Node.Node, x Node.Node) int {
 	for i, n := range a {
 		if x.IPaddress == n.IPaddress && x.Port == n.Port {
 			return i
@@ -146,6 +147,6 @@ func findNodeInArray(a []node, x node) int {
 	return len(a)
 }
 
-func getHourMinuteSecond(hour, minute, second time.Duration) time.Time {
+func GetHourMinuteSecond(hour, minute, second time.Duration) time.Time {
 	return time.Now().Add(time.Hour*hour + time.Minute*minute + time.Second*second)
 }

@@ -1,4 +1,4 @@
-package main
+package Node
 
 import (
 	"encoding/json"
@@ -6,21 +6,21 @@ import (
 	"time"
 )
 
-type node struct {
+type Node struct {
 	IPaddress  string
 	Port       string
 	LastActive time.Time
 }
 
-func newNode(ip string, port string) node {
+func NewNode(ip string, port string) Node {
 
-	returnNode := new(node)
+	returnNode := new(Node)
 	returnNode.IPaddress = ip
 	returnNode.Port = port
 	returnNode.LastActive = time.Now()
 	return *returnNode
 }
-func (node node) toJSONString() string {
+func (node Node) toJSONString() string {
 	nodeString, err := json.Marshal(node)
 	if err != nil {
 		log.Fatalln(err)
@@ -28,6 +28,6 @@ func (node node) toJSONString() string {
 	return string(nodeString)
 }
 
-func (node *node) setActive() {
+func (node *Node) SetActive() {
 	node.LastActive = time.Now()
 }
