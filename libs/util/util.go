@@ -19,6 +19,10 @@ type Configuration struct {
 	KeepAlive		 time.Duration
 	NetworkName		 string
 }
+type ConfigConnector struct {
+	//token string
+	Command string
+}
 
 func ParseArguments() map[string]string {
 
@@ -126,6 +130,7 @@ func PostRequest(url string, postRequest []byte) string {
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Println(err)
+		return "NOK"
 	}
 	//defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
@@ -149,4 +154,19 @@ func FindNodeInArray(a []Node.Node, x Node.Node) int {
 
 func GetHourMinuteSecond(hour, minute, second time.Duration) time.Time {
 	return time.Now().Add(time.Hour*hour + time.Minute*minute + time.Second*second)
+}
+
+func ExecuteConfigCommand(connectionString string, command string) string {
+	//check config
+	connectionString = "http://" + connectionString + "/config"
+
+	sendConfigCommand := &ConfigConnector{Command: command}
+	
+	bytesRepresentation, err := json.Marshal(sendConfigCommand)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	log.Println("sending command")
+	log.Println(string(bytesRepresentation))
+	return PostRequest(connectionString,bytesRepresentation)
 }

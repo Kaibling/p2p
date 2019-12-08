@@ -46,9 +46,10 @@ func startConsole() {
 
 }
 
+
 func listNodes() {
-	url := "http://localhost:7070/getNodes"
-	result := util.GetRequest(url)
+
+	result := util.ExecuteConfigCommand("127.0.0.1:7070","LISTNODES")
 	if result == "NOK" {
 		fmt.Println("no connection to server")
 	} else {
@@ -60,6 +61,7 @@ func listNodes() {
 	}
 
 }
+
 
 func help() {
 	fmt.Printf("ls     - list nodes\nq/quit - quit cli\nconfig - show network config\n")
