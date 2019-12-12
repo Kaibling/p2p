@@ -12,10 +12,18 @@ import (
 	"github.com/Kaibling/p2p/libs/util"
 )
 
+type Payload interface {
+	getVersion() string
+	saveData()
+	getData() interface {}
+	toJSON() string
+}
+
 type p2pserver struct {
 	nodeBuffer    *nodeBuffer
 	publicIP      string
 	configuration *util.Configuration
+	payload			*Payload
 }
 type nodeBuffer struct {
 	nodes []Node.Node
@@ -109,6 +117,10 @@ func (p2pserver *p2pserver) deleteNode(ipAddress string, port string) {
 	p2pserver.nodeBuffer.deleteNode(searchNode)
 }
 
+func (p2pserver *p2pserver) AddPayload(payload Payload) {
+
+}
+
 func (p2pserver *p2pserver) registerNetwork() {
 
 	//send own node data to server
@@ -131,21 +143,6 @@ func (p2pserver *p2pserver) registerNetwork() {
 	log.Println(result)
 	p2pserver.nodeBuffer.nodes = result
 
-	//check config
-	/*
-	connectionString = "http://" + p2pserver.configuration.PeerServer + "/config"	
-	sendConfigCheck := &configCheck{NetworkName: p2pserver.configuration.NetworkName,KeepAlive: p2pserver.configuration.KeepAlive}
-	bytesRepresentation, err = json.Marshal(sendConfigCheck)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	log.Println("sending config")
-	log.Println(string(bytesRepresentation))
-	configStatus := util.PostRequest(connectionString,bytesRepresentation)
-	if configStatus != "OK" {
-		log.Println("config missmatch")
-	} 
-	*/
 }
 
 func (p2pserver *p2pserver) StartServer() {
@@ -162,7 +159,6 @@ func (p2pserver *p2pserver) StartServer() {
 	log.Println("Server started on " + p2pserver.configuration.BindingIPAddress + ":" + p2pserver.configuration.BindingPort)
 
 	http.HandleFunc("/ping", pingHandler)
-	//http.HandleFunc("/getNodes", p2pserver.getNodesHandler)
 	http.HandleFunc("/register", p2pserver.registerHandler)
 	http.HandleFunc("/pushNode", p2pserver.pushNewNodeInfoHandler)
 	http.HandleFunc("/config", p2pserver.configHandler)
@@ -194,31 +190,8 @@ func (p2pserver *p2pserver) configHandler(w http.ResponseWriter, r *http.Request
 	default:
 		fmt.Fprintf(w, "COMMAND INVALID")
 	}
-/*
-	var result configCheck
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(r.Body)
-	json.Unmarshal([]byte(buf.String()), &result)
-	
-	if result.NetworkName != p2pserver.configuration.NetworkName || result.KeepAlive != p2pserver.configuration.KeepAlive {
-		log.Println("config missmatch with client")
-		log.Println(p2pserver.configuration)
-		log.Println(result)
-		fmt.Fprintf(w, "NOK")
-	} else {
-		fmt.Fprintf(w, "OK")
-	}
-	*/
-
 }
 
-
-/*
-func (p2pserver *p2pserver) getNodesHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println(r)
-	fmt.Fprintf(w, p2pserver.nodeBuffer.toJSON())
-}
-*/
 
 func (p2pserver *p2pserver) registerHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -302,8 +275,4 @@ func (p2pserver *p2pserver) keepAlive() {
 		}
 	}()
 
-	//time.Sleep(3000 * time.Millisecond)
-	//ticker.Stop()
-	//done <- true
-	//fmt.Println("Ticker stopped")
 }

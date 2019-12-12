@@ -9,6 +9,7 @@ func main() {
 	cliArguments := util.ParseArguments()
 	config := util.ParseConfigurationFile(cliArguments["configFilePath"])
 	server := p2pServer.Newp2pServer(config)
+	//server.AddPayload()
 	server.StartServer()
 
 }
