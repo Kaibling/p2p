@@ -14,7 +14,7 @@ import (
 
 type Payload interface {
 	getVersion() string
-	saveData()
+	saveData(interface {})
 	getData() interface {}
 	toJSON() string
 }
@@ -69,6 +69,7 @@ func (nodeBuffer *nodeBuffer) toJSON() string {
 	return string(jnodes)
 }
 
+
 func Newp2pServer(configuration *util.Configuration) *p2pserver {
 
 	returnP2Pserver := new(p2pserver)
@@ -104,6 +105,10 @@ func (p2pserver *p2pserver) pushNode(ipAddress string, port string) {
 
 }
 
+func (p2pserver *p2pserver) getPayload() *Payload {
+	return p2pserver.payload
+}
+
 func (p2pserver *p2pserver) addNode(ipAddress string, port string) {
 
 	//save locally
@@ -117,7 +122,8 @@ func (p2pserver *p2pserver) deleteNode(ipAddress string, port string) {
 	p2pserver.nodeBuffer.deleteNode(searchNode)
 }
 
-func (p2pserver *p2pserver) AddPayload(payload Payload) {
+func (p2pserver *p2pserver) AddPayload(payload *Payload) {
+	p2pserver.payload = payload
 
 }
 
@@ -162,6 +168,7 @@ func (p2pserver *p2pserver) StartServer() {
 	http.HandleFunc("/register", p2pserver.registerHandler)
 	http.HandleFunc("/pushNode", p2pserver.pushNewNodeInfoHandler)
 	http.HandleFunc("/config", p2pserver.configHandler)
+	http.HandleFunc("/test", testHandler)
 
 	http.ListenAndServe(":"+p2pserver.configuration.BindingPort, nil)
 }
@@ -190,6 +197,13 @@ func (p2pserver *p2pserver) configHandler(w http.ResponseWriter, r *http.Request
 	default:
 		fmt.Fprintf(w, "COMMAND INVALID")
 	}
+}
+
+func (p2pserver *p2pserver) testHandler(w http.ResponseWriter, r *http.Request) {
+
+	log.Println(r.Method)
+
+	fmt.Fprintf(w, p2pserver.payload.toJSON())
 }
 
 
