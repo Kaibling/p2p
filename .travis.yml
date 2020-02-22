@@ -5,6 +5,7 @@ go:
 jobs:
   include:
     - stage: unit tests
+      if: branch = master
       script: 
         - go test ./... -v -covermode=count -coverprofile=coverage.out
         - $HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-ci
@@ -19,7 +20,6 @@ jobs:
         - go get github.com/Kaibling/p2p/libs/util
         - go get github.com/Kaibling/p2p/libs/Node
     - stage: Linux release
-      if: branch = master
       script: 
         - go build -o p2pserverd cmd/p2pServer/main.go
         - ls
