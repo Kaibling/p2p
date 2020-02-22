@@ -6,6 +6,10 @@
 *.dylib
 *.json
 
+# local binaries
+p2pServer
+p2pCli
+
 # Test binary, build with `go test -c`
 *.test
 
