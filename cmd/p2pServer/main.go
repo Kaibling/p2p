@@ -1,6 +1,6 @@
 package main
 
-import "github.com/Kaibling/p2p/p2pServer"
+import "github.com/Kaibling/p2p/peerserver"
 import "github.com/Kaibling/p2p/libs/util"
 
 
@@ -9,10 +9,10 @@ import "log"
 
 type User struct {
 Name string
-LastUpdated string
+LastUpdated int
 }
 
-	func (User *User) getVersion() string {
+	func (User *User) getVersion() int {
 		return User.LastUpdated
 
 	}
@@ -38,10 +38,13 @@ func main() {
 
 	cliArguments := util.ParseArguments()
 	config := util.ParseConfigurationFile(cliArguments["configFilePath"])
-	server := p2pServer.Newp2pServer(config)
+	server := peerserver.Newpeerserver(config)
 
-	userObject := new(User)
-	server.AddPayload(userObject)
+	userObject := &User{
+        Name: "Hans",
+        LastUpdated: 123,
+    }
+	server.GeneratePayload(userObject)
 	server.StartServer()
 
 }

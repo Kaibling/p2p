@@ -1,4 +1,4 @@
-package p2pServer
+package peerserver
 
 import (
 	"io/ioutil"
