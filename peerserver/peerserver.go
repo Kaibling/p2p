@@ -12,6 +12,12 @@ import (
 	"time"
 )
 
+func init(){
+    //log.SetPrefix("TRACE: ")
+    log.SetFlags(log.Ldate | log.Lmicroseconds | log.Llongfile)
+    log.Println("Logging started")
+}
+
 type payload struct {
 	Version string
 	Data    interface{}
@@ -30,13 +36,13 @@ func (p2pserver *Peerserver) addNode(ipAddress string, port string) {
 	node := Node.NewNode(ipAddress, port)
 	i := util.FindNodeInArray(p2pserver.nodes, node)
 	if i == len(p2pserver.nodes) {
-		log.Println("new element found")
+		//.Println("new element found")
 		p2pserver.nodes = append(p2pserver.nodes, node)
-		log.Print("add Node to Buffer: ")
-		log.Println(node)
+		//log.Print("add Node to Buffer: ")
+		//log.Println(node)
 
 	} else {
-		log.Println("node already in buffer. skip")
+		//log.Println("node already in buffer. skip")
 	}
 
 }
@@ -45,12 +51,12 @@ func (p2pserver *Peerserver) deleteNode(ipAddress string, port string) {
 	node := Node.NewNode(ipAddress, port)
 	i := util.FindNodeInArray(p2pserver.nodes, node)
 	if i == len(p2pserver.nodes) {
-		log.Println("element not found")
+		//log.Println("element not found")
 		return
 	}
 	p2pserver.nodes = append(p2pserver.nodes[:i], p2pserver.nodes[i+1:]...)
 	log.Println(node)
-	log.Println("node deleted")
+	//log.Println("node deleted")
 
 }
 
@@ -74,6 +80,7 @@ func Newpeerserver(configuration *util.Configuration) *Peerserver {
 }
 
 func (p2pserver *Peerserver) pushNode(ipAddress string, port string) {
+
 	newNode := Node.NewNode(ipAddress, port)
 	//push to network
 	for _, node := range p2pserver.nodes {
@@ -96,7 +103,8 @@ func (p2pserver *Peerserver) pushNode(ipAddress string, port string) {
 
 }
 
-func (p2pserver *Peerserver) getPayloadData() interface{} {
+//GetPayloadData recieve Data
+func (p2pserver *Peerserver) GetPayloadData() interface{} {
 	return p2pserver.payload.Data
 }
 
@@ -110,14 +118,14 @@ func (p2pserver *Peerserver) GeneratePayload(data interface{}) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	log.Println("saved payload: ", string(bytesRepresentation))
+	log.Println("GeneratePayload: payload saved: ", string(bytesRepresentation))
 }
 
 func (p2pserver *Peerserver) registerNetwork() {
 
 	//send own node data to server
 	connectionString := "http://" + p2pserver.configuration.PeerServer + "/register"
-	log.Println("trying to register to " + connectionString)
+	log.Println("registerNetwork: trying to register to " + connectionString)
 	localNode := Node.NewNode(p2pserver.configuration.BindingIPAddress, p2pserver.configuration.BindingPort)
 	bytesRepresentation, err := json.Marshal(localNode)
 	if err != nil {
@@ -131,8 +139,7 @@ func (p2pserver *Peerserver) registerNetwork() {
 	//get nodes vom server
 	var result []Node.Node
 	json.NewDecoder(resp.Body).Decode(&result)
-	log.Println("get response from network connect request")
-	log.Println(result)
+	log.Println("registerNetwork: getting network topology",result)
 	p2pserver.nodes = result
 
 	//get Payload
@@ -140,7 +147,7 @@ func (p2pserver *Peerserver) registerNetwork() {
 	requestData := util.GetRequest(url)
 	var payloadresult payload
 	json.Unmarshal([]byte(requestData), &payloadresult)
-	log.Println(payloadresult)
+	log.Println("registerNetwork: payload recieved from  from " ,url, " -> ",payloadresult.Version)
 	*p2pserver.payload = payloadresult
 
 }
@@ -149,33 +156,33 @@ func (p2pserver *Peerserver) registerNetwork() {
 func (p2pserver *Peerserver) StartServer() {
 
 	if strings.Compare(p2pserver.configuration.PeerServer, "") != 0 {
-		log.Println("Connection String " + p2pserver.configuration.PeerServer + " found")
+		log.Println("StartServer: Connection String " + p2pserver.configuration.PeerServer + " found")
 		//connection to server
 		p2pserver.registerNetwork()
 	} else {
-		log.Println("Starting  new network")
+		log.Println("StartServer: Starting  new network")
 	}
 
-	log.Println("Server started on " + p2pserver.configuration.BindingIPAddress + ":" + p2pserver.configuration.BindingPort)
+	log.Println("StartServer: Server started on " + p2pserver.configuration.BindingIPAddress + ":" + p2pserver.configuration.BindingPort)
 
 	http.HandleFunc("/ping", pingHandler)
 	http.HandleFunc("/register", p2pserver.registerHandler)
 	http.HandleFunc("/pushNode", p2pserver.pushNewNodeInfoHandler)
 	http.HandleFunc("/config", p2pserver.configHandler)
 	http.HandleFunc("/receivePL", p2pserver.receivePayloadHandler)
-	http.HandleFunc("/pullPL", p2pserver.pullPayloadHandler)
+	//http.HandleFunc("/pullPL", p2pserver.pullPayloadHandler)
 	http.HandleFunc("/health", p2pserver.healthHandler)
 
 	http.ListenAndServe(":"+p2pserver.configuration.BindingPort, nil)
 }
 
 func pingHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("/ping")
+	log.Println("pingHandler: /ping")
 	fmt.Fprintf(w, "OK")
 }
 
 func (p2pserver *Peerserver) healthHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("health check")
+	log.Println("healthHandler: health check")
 	fmt.Fprintf(w, "connected Nodes: %s\n", p2pserver.nodesToJSON())
 	bytesRepresentation, err := json.Marshal(p2pserver.payload)
 	if err != nil {
@@ -186,7 +193,7 @@ func (p2pserver *Peerserver) healthHandler(w http.ResponseWriter, r *http.Reques
 
 func (p2pserver *Peerserver) configHandler(w http.ResponseWriter, r *http.Request) {
 
-	log.Println(r.Method)
+	log.Println("configHandler:",r.Method)
 	if err := r.ParseForm(); err != nil {
 		fmt.Println(w, "ParseForm() err: %v", err)
 		return
@@ -204,21 +211,21 @@ func (p2pserver *Peerserver) configHandler(w http.ResponseWriter, r *http.Reques
 	}
 }
 
+//func (p2pserver *Peerserver) pullPayloadHandler(w http.ResponseWriter, r *http.Request) {
+//
+//	log.Println(r.Method)
+//	//parse client
+//	var resa payload
+//	buf := new(bytes.Buffer)
+//	buf.ReadFrom(r.Body)
+//	json.Unmarshal([]byte(buf.String()), &resa)
+//	log.Println(resa)
+//	p2pserver.payload = &resa
+//}
+
 func (p2pserver *Peerserver) receivePayloadHandler(w http.ResponseWriter, r *http.Request) {
 
-	log.Println(r.Method)
-	//parse client
-	var resa payload
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(r.Body)
-	json.Unmarshal([]byte(buf.String()), &resa)
-	log.Println(resa)
-	p2pserver.payload = &resa
-}
-
-func (p2pserver *Peerserver) pullPayloadHandler(w http.ResponseWriter, r *http.Request) {
-
-	log.Println(r.Method)
+	log.Println("receivePayloadHandler",r.Method)
 	//parse client
 	bytesRepresentation, err := json.Marshal(p2pserver.payload)
 	if err != nil {
@@ -229,8 +236,8 @@ func (p2pserver *Peerserver) pullPayloadHandler(w http.ResponseWriter, r *http.R
 
 func (p2pserver *Peerserver) registerHandler(w http.ResponseWriter, r *http.Request) {
 
-	log.Println("register attempt")
-	log.Println(r.Method)
+	log.Println("registerHandler: register attempt")
+	log.Println("registerHandler:",r.Method)
 	if err := r.ParseForm(); err != nil {
 		fmt.Println(w, "ParseForm() err: %v", err)
 		return
@@ -245,7 +252,7 @@ func (p2pserver *Peerserver) registerHandler(w http.ResponseWriter, r *http.Requ
 	p2pserver.addNode(resa.IPaddress, resa.Port)
 
 	//send to client
-	log.Println("send: " + p2pserver.nodesToJSON())
+	log.Println("registerHandler: send: " + p2pserver.nodesToJSON())
 	fmt.Fprintf(w, p2pserver.nodesToJSON())
 
 	p2pserver.pushNode(resa.IPaddress, resa.Port)
@@ -254,8 +261,7 @@ func (p2pserver *Peerserver) registerHandler(w http.ResponseWriter, r *http.Requ
 
 func (p2pserver *Peerserver) pushNewNodeInfoHandler(w http.ResponseWriter, r *http.Request) {
 
-	log.Println("push new infos ...")
-	log.Println(r.Method)
+	log.Println("pushNewNodeInfoHandler: push new infos .... Request with ",r.Method)
 	if err := r.ParseForm(); err != nil {
 		fmt.Println(w, "ParseForm() err: %v", err)
 		return
@@ -270,7 +276,7 @@ func (p2pserver *Peerserver) pushNewNodeInfoHandler(w http.ResponseWriter, r *ht
 	p2pserver.addNode(resa.IPaddress, resa.Port)
 
 	//send to client
-	log.Println("send: " + "OK")
+	log.Println("pushNewNodeInfoHandler: send: " + "OK")
 	fmt.Fprintf(w, "OK")
 
 }
@@ -293,14 +299,14 @@ func (p2pserver *Peerserver) keepAlive() {
 					oldStamp := util.GetHourMinuteSecond(0, 0, -time.Duration(p2pserver.configuration.KeepAlive))
 					if node.LastActive.Before(oldStamp) {
 
-						log.Println("node too old")
+						log.Println("keepAlive: node too old")
 						url := "http://" + node.IPaddress + ":" + node.Port + "/ping"
 						requestData := util.GetRequest(url)
 						if requestData == "OK" {
-							log.Println("KeepAlive OK with " + url)
+							log.Println("keepAlive: KeepAlive OK with " + url)
 							node.SetActive()
 						} else {
-							log.Println("KeepAlive failed with " + url)
+							log.Println("keepAlive: KeepAlive failed with " + url)
 							p2pserver.deleteNode(node.IPaddress, node.Port)
 						}
 					}

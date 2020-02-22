@@ -12,6 +12,7 @@ import (
 	"github.com/Kaibling/p2p/libs/Node"
 )
 
+//Configuration a
 type Configuration struct {
 	BindingIPAddress string
 	BindingPort      string
@@ -19,11 +20,14 @@ type Configuration struct {
 	KeepAlive		 time.Duration
 	NetworkName		 string
 }
+
+//ConfigConnector sd
 type ConfigConnector struct {
 	//token string
 	Command string
 }
 
+//ParseArguments asd
 func ParseArguments() map[string]string {
 
 	arguments := make(map[string]string)
@@ -55,6 +59,7 @@ func getPublicIP() string {
 }
 */
 
+//GetRequest sd
 func GetRequest(url string) string {
 
 	resp, err := http.Get(url)
@@ -70,6 +75,7 @@ func GetRequest(url string) string {
 	return string(data)
 }
 
+//ParseConfigurationFile sd
 func ParseConfigurationFile(filepath string) *Configuration {
 
 	if filepath == "config.json" {
@@ -111,12 +117,14 @@ func ParseConfigurationFile(filepath string) *Configuration {
 	return returnConfig
 }
 
+//CheckError sd
 func CheckError(err error) {
 	if err != nil {
 		log.Fatalln(err)
 	}
 }
 
+//PostRequest sds
 func PostRequest(url string, postRequest []byte) string {
 
 	log.Println("trying post request to: ", url)
@@ -142,7 +150,7 @@ func PostRequest(url string, postRequest []byte) string {
 
 	return string(body)
 }
-
+//FindNodeInArray sd
 func FindNodeInArray(a []Node.Node, x Node.Node) int {
 	for i, n := range a {
 		if x.IPaddress == n.IPaddress && x.Port == n.Port {
@@ -152,10 +160,12 @@ func FindNodeInArray(a []Node.Node, x Node.Node) int {
 	return len(a)
 }
 
+//GetHourMinuteSecond sad
 func GetHourMinuteSecond(hour, minute, second time.Duration) time.Time {
 	return time.Now().Add(time.Hour*hour + time.Minute*minute + time.Second*second)
 }
 
+//ExecuteConfigCommand asd
 func ExecuteConfigCommand(connectionString string, command string) string {
 	//check config
 	connectionString = "http://" + connectionString + "/config"
@@ -166,7 +176,7 @@ func ExecuteConfigCommand(connectionString string, command string) string {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	log.Println("sending command")
+	log.Println("ExecuteConfigCommand: sending command")
 	log.Println(string(bytesRepresentation))
 	return PostRequest(connectionString,bytesRepresentation)
 }
