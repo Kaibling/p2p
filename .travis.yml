@@ -14,7 +14,7 @@ jobs:
       before_install:
         - go get golang.org/x/tools/cmd/cover
         - go get github.com/mattn/goveralls
-        - go get github.com/Kaibling/p2p/p2pServer
+        - go get github.com/Kaibling/p2p/peerserver
         - go get github.com/Kaibling/p2p/libs/util
         - go get github.com/Kaibling/p2p/libs/Node
     - stage: Linux release
