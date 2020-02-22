@@ -12,12 +12,6 @@ import (
 	"time"
 )
 
-func init(){
-    //log.SetPrefix("TRACE: ")
-    log.SetFlags(log.Ldate | log.Lmicroseconds | log.Llongfile)
-    log.Println("Logging started")
-}
-
 type payload struct {
 	Version string
 	Data    interface{}

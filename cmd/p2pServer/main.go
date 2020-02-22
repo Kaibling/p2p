@@ -32,9 +32,17 @@ LastUpdated int
 		return string(jsonByte)
 	}
 
+	
+func init(){
+    //log.SetPrefix("TRACE: ")
+    log.SetFlags(log.Ldate | log.Lmicroseconds | log.Llongfile)
+    log.Println("Logging started")
+}
 
 
 func main() {
+
+	
 
 	cliArguments := util.ParseArguments()
 	config := util.ParseConfigurationFile(cliArguments["configFilePath"])
